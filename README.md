@@ -7,6 +7,7 @@ A Python project that compares BFS pathfinding with a genetic algorithm to balan
 - BFS shortest-path distance from depot to each delivery point
 - Genetic algorithm for load-balanced package allocation
 - Clear fitness function: minimizes distance imbalance
+- Early stopping based on target fitness or no-improvement patience
 - Matplotlib visualization of depot, obstacles, and assignments
 
 ## Tech Stack
@@ -45,8 +46,9 @@ python delivery_allocation_ai.py
 ## Notes
 - Chromosome: binary array of length 6  
 - Crossover: single-point  
-- Mutation: 10% per gene  
+- Mutation: random reset (binary gene), 10% per gene  
 - Selection: tournament (size 3)  
+- Termination: max generations, target fitness, or no-improvement patience  
 - Goal: minimize distance imbalance between vehicles  
 
 ---
