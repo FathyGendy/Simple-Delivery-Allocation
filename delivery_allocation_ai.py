@@ -78,14 +78,21 @@ def single_point_crossover(parent1, parent2):
     child2 = parent2[:crossover_point] + parent1[crossover_point:]
     return child1, child2
 
-def mutate(chromosome, mutation_rate):
-    """Randomly flips bits based on the mutation rate."""
+def mutate(chromosome, mutation_rate, gene_min=0, gene_max=1):
+    """Random mutation: reset a gene to a random value within bounds."""
     for i in range(len(chromosome)):
         if random.random() < mutation_rate:
-            chromosome[i] = 1 - chromosome[i]
+            chromosome[i] = random.randint(gene_min, gene_max)
     return chromosome
 
-def genetic_algorithm(distances, pop_size=20, generations=50, mutation_rate=0.1):
+def genetic_algorithm(
+    distances,
+    pop_size=20,
+    generations=50,
+    mutation_rate=0.1,
+    patience=8,
+    target_fitness=1.0
+):
     """
     Main GA loop to find the best package allocation.
     """
@@ -97,15 +104,29 @@ def genetic_algorithm(distances, pop_size=20, generations=50, mutation_rate=0.1)
     best_v1_dist = 0
     best_v2_dist = 0
 
+    no_improve_count = 0
+
     for gen in range(generations):
         fitness_results = [calculate_fitness(chrom, distances) for chrom in population]
         fitnesses = [res[0] for res in fitness_results]
 
+        improved = False
         for i, fitness in enumerate(fitnesses):
             if fitness > best_fitness:
                 best_fitness = fitness
                 best_solution = population[i][:]
                 _, best_v1_dist, best_v2_dist = fitness_results[i]
+                improved = True
+
+        if improved:
+            no_improve_count = 0
+        else:
+            no_improve_count += 1
+
+        if target_fitness is not None and best_fitness >= target_fitness:
+            break
+        if patience is not None and no_improve_count >= patience:
+            break
 
         new_population = [best_solution[:]]
 
@@ -187,7 +208,9 @@ def main():
         distances=distances,
         pop_size=20,
         generations=50,
-        mutation_rate=0.1
+        mutation_rate=0.1,
+        patience=8,
+        target_fitness=1.0
     )
     print("\n" + "=" * 50)
     print("   OPTIMIZATION RESULTS")
